@@ -1,6 +1,15 @@
 const guildService = require('../../database/guildService');
 const vietnameseDict = require('../../utils/vietnameseDict');
+const EMOJIS = require('../../utils/emojis');
 const logger = require('../../utils/logger');
+
+async function safeReact(message, customEmojiId, fallbackUnicode) {
+  try {
+    await message.react(customEmojiId);
+  } catch {
+    await message.react(fallbackUnicode).catch(() => {});
+  }
+}
 
 module.exports = {
   name: 'messageCreate',
@@ -15,44 +24,44 @@ module.exports = {
     const rawContent = message.content;
     const cleanWord = vietnameseDict.normalize(rawContent);
 
-    // Bỏ qua tin nhắn bắt đầu bằng dấu gạch chéo (nếu có bot prefix khác)
+    // Bỏ qua tin nhắn bắt đầu bằng dấu gạch chéo
     if (rawContent.startsWith('/') || rawContent.startsWith('!')) return;
 
     // 1. Kiểm tra định dạng 2 từ (âm tiết)
     const wordCount = vietnameseDict.getWordCount(cleanWord);
     if (wordCount !== 2) {
-      await message.react('❌').catch(() => {});
+      await safeReact(message, '1116681983356047452', '❌');
       return message.reply({
-        content: `⚠️ Cụm từ bạn nhập phải có **đúng 2 tiếng** (Ví dụ: \`con mèo\`, \`mèo mướp\`).`
+        content: `${EMOJIS.redTick} Cụm từ bạn nhập phải có **đúng 2 tiếng** (Ví dụ: \`con mèo\`, \`mèo mướp\`).`
       });
     }
 
     // 2. Chống tự nối 2 lượt liên tiếp
     if (gameData.lastUserId === message.author.id) {
-      await message.react('❌').catch(() => {});
+      await safeReact(message, '1116681983356047452', '❌');
       return message.reply({
-        content: `⚠️ Bạn không thể tự nối lượt của chính mình! Hãy nhường cho người chơi khác.`
+        content: `${EMOJIS.redTick} Bạn không thể tự nối lượt của chính mình! Hãy nhường cho người chơi khác nhé.`
       });
     }
 
     // 3. Kiểm tra từ điển Tiếng Việt
     if (!vietnameseDict.isValidTwoWords(cleanWord)) {
-      await message.react('❌').catch(() => {});
+      await safeReact(message, '1116681983356047452', '❌');
       guildService.resetWordChainStreak(message.guild.id);
       return message.reply({
-        content: `❌ Cụm từ **"${cleanWord}"** không có trong từ điển tiếng Việt!\n` +
-                 `💥 Chuỗi điểm **${gameData.streak}** đã bị reset về 0. Hãy bắt đầu một chuỗi mới bất kỳ!`
+        content: `${EMOJIS.redTick} Cụm từ **"${cleanWord}"** không có trong từ điển tiếng Việt!\n` +
+                 `💥 Chuỗi điểm **${gameData.streak}** đã bị reset về 0. Hãy mở đầu một chuỗi mới bất kỳ!`
       });
     }
 
-    // 4. Kiểm tra luật nối từ (tiếng đầu người sau trùng tiếng cuối người trước)
+    // 4. Kiểm tra luật nối từ
     if (gameData.lastWord) {
       if (!vietnameseDict.canChain(gameData.lastWord, cleanWord)) {
-        await message.react('❌').catch(() => {});
+        await safeReact(message, '1116681983356047452', '❌');
         guildService.resetWordChainStreak(message.guild.id);
         const expectedStart = gameData.lastWord.split(' ')[1];
         return message.reply({
-          content: `❌ Cụm từ **"${cleanWord}"** không bắt đầu bằng chữ **"${expectedStart}"** (từ trước: *${gameData.lastWord}*)!\n` +
+          content: `${EMOJIS.redTick} Cụm từ **"${cleanWord}"** không bắt đầu bằng chữ **"${expectedStart}"** (từ trước: *${gameData.lastWord}*)!\n` +
                    `💥 Chuỗi điểm **${gameData.streak}** đã bị reset về 0. Bắt đầu lại nào!`
         });
       }
@@ -60,16 +69,16 @@ module.exports = {
 
     // 5. Kiểm tra lặp từ trong chuỗi hiện tại
     if (gameData.usedWords.includes(cleanWord)) {
-      await message.react('❌').catch(() => {});
+      await safeReact(message, '1116681983356047452', '❌');
       guildService.resetWordChainStreak(message.guild.id);
       return message.reply({
-        content: `❌ Cụm từ **"${cleanWord}"** đã từng xuất hiện trong chuỗi này!\n` +
+        content: `${EMOJIS.redTick} Cụm từ **"${cleanWord}"** đã từng xuất hiện trong chuỗi này!\n` +
                  `💥 Chuỗi điểm **${gameData.streak}** đã bị reset về 0. Bắt đầu lại nào!`
       });
     }
 
     // 6. NỐI TỪ HỢP LỆ THÀNH CÔNG!
-    await message.react('✅').catch(() => {});
+    await safeReact(message, '1116681997201457162', '✅');
     const newStreak = gameData.streak + 1;
     const newUsedWords = [...gameData.usedWords, cleanWord];
 
@@ -86,11 +95,11 @@ module.exports = {
     // Thông báo mốc streak đặc biệt hoặc kỷ lục mới
     if (newStreak % 25 === 0) {
       await message.channel.send({
-        content: `🔥 **Tuyệt vời!** Chuỗi nối từ máy chủ đã đạt mốc **${newStreak}** từ liên tiếp!`
+        content: `${EMOJIS.party} **TUYỆT VỜI!** Chuỗi nối từ máy chủ đã đạt mốc **${newStreak}** từ liên tiếp! ${EMOJIS.crownPink}`
       });
     } else if (newStreak > gameData.maxStreak && newStreak > 10 && (newStreak - gameData.maxStreak === 1)) {
       await message.channel.send({
-        content: `🏆 **Kỷ lục mới!** Máy chủ vừa thiết lập chuỗi nối từ dài nhất: **${newStreak}** từ!`
+        content: `${EMOJIS.crownOwner} **KỶ LỤC MỚI!** Máy chủ vừa thiết lập chuỗi nối từ dài nhất lịch sử: **${newStreak}** từ! ${EMOJIS.sparkle}`
       });
     }
   }

@@ -1,5 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
 const CustomEmbed = require('../../utils/embedBuilder');
+const { PALETTE, DIVIDER } = require('../../utils/embedBuilder');
+const EMOJIS = require('../../utils/emojis');
 const guildService = require('../../database/guildService');
 
 module.exports = {
@@ -25,12 +27,16 @@ module.exports = {
 
     guildService.setWelcome(interaction.guildId, channel.id, message);
 
-    const embed = CustomEmbed.success(
-      'Cấu Hình Welcome Thành Công',
-      `✅ Đã đặt kênh chào mừng thành viên mới tại: ${channel}\n` +
-      `📝 **Tin nhắn:** \`${message || 'Mặc định'}\`\n\n` +
-      `💡 *Mẹo: Bạn có thể sử dụng các biến: \`{user}\`, \`{username}\`, \`{server}\`, \`{memberCount}\` trong câu chào mừng.*`
-    );
+    const embed = CustomEmbed.card(PALETTE.cyan)
+      .setTitle(`${EMOJIS.party} Cấu Hình Chào Mừng (Welcome) Thành Công!`)
+      .setDescription(
+        `${DIVIDER}\n` +
+        `📍 **Kênh chào mừng:** ${channel}\n` +
+        `💬 **Lời chào tuỳ chỉnh:** \`${message || 'Mặc định'}\`\n\n` +
+        `💡 *Biến hỗ trợ: \`{user}\`, \`{username}\`, \`{server}\`, \`{memberCount}\`*\n` +
+        `${DIVIDER}`
+      )
+      .setFooter({ text: `${interaction.guild.name} • Welcome System Active ${EMOJIS.star}` });
 
     await interaction.reply({ embeds: [embed] });
   }

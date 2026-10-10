@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
-const { config } = require('../config');
+const EMOJIS = require('./emojis');
 
 const PALETTE = {
   blurple: 0x5865F2,
@@ -24,7 +24,7 @@ class CustomEmbed extends EmbedBuilder {
   static success(title, description) {
     const embed = new CustomEmbed()
       .setColor(PALETTE.emerald)
-      .setTitle(`✨ ${title}`);
+      .setTitle(`${EMOJIS.blueTick} ${title}`);
     if (description) embed.setDescription(`${DIVIDER}\n${description}\n${DIVIDER}`);
     return embed;
   }
@@ -32,7 +32,7 @@ class CustomEmbed extends EmbedBuilder {
   static error(title, description) {
     const embed = new CustomEmbed()
       .setColor(PALETTE.ruby)
-      .setTitle(`🚨 ${title}`);
+      .setTitle(`${EMOJIS.redTick} ${title}`);
     if (description) embed.setDescription(`${DIVIDER}\n${description}\n${DIVIDER}`);
     return embed;
   }
@@ -40,7 +40,7 @@ class CustomEmbed extends EmbedBuilder {
   static warning(title, description) {
     const embed = new CustomEmbed()
       .setColor(PALETTE.amber)
-      .setTitle(`⚠️ ${title}`);
+      .setTitle(`${EMOJIS.sparkle} ${title}`);
     if (description) embed.setDescription(`${DIVIDER}\n${description}\n${DIVIDER}`);
     return embed;
   }
@@ -48,7 +48,7 @@ class CustomEmbed extends EmbedBuilder {
   static info(title, description) {
     const embed = new CustomEmbed()
       .setColor(PALETTE.blurple)
-      .setTitle(`ℹ️ ${title}`);
+      .setTitle(`${EMOJIS.star} ${title}`);
     if (description) embed.setDescription(`${DIVIDER}\n${description}\n${DIVIDER}`);
     return embed;
   }

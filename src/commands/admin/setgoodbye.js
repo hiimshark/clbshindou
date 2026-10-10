@@ -1,5 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
 const CustomEmbed = require('../../utils/embedBuilder');
+const { PALETTE, DIVIDER } = require('../../utils/embedBuilder');
+const EMOJIS = require('../../utils/emojis');
 const guildService = require('../../database/guildService');
 
 module.exports = {
@@ -25,12 +27,16 @@ module.exports = {
 
     guildService.setGoodbye(interaction.guildId, channel.id, message);
 
-    const embed = CustomEmbed.success(
-      'Cấu Hình Goodbye Thành Công',
-      `✅ Đã đặt kênh tạm biệt thành viên tại: ${channel}\n` +
-      `📝 **Tin nhắn:** \`${message || 'Mặc định'}\`\n\n` +
-      `💡 *Mẹo: Bạn có thể sử dụng các biến: \`{user}\`, \`{username}\`, \`{server}\`, \`{memberCount}\` trong câu tạm biệt.*`
-    );
+    const embed = CustomEmbed.card(PALETTE.ruby)
+      .setTitle(`${EMOJIS.brownBow} Cấu Hình Tạm Biệt (Goodbye) Thành Công!`)
+      .setDescription(
+        `${DIVIDER}\n` +
+        `📍 **Kênh tạm biệt:** ${channel}\n` +
+        `💬 **Lời tạm biệt tuỳ chỉnh:** \`${message || 'Mặc định'}\`\n\n` +
+        `💡 *Biến hỗ trợ: \`{user}\`, \`{username}\`, \`{server}\`, \`{memberCount}\`*\n` +
+        `${DIVIDER}`
+      )
+      .setFooter({ text: `${interaction.guild.name} • Goodbye System Active ${EMOJIS.star}` });
 
     await interaction.reply({ embeds: [embed] });
   }

@@ -5,7 +5,10 @@ const { config } = require('../config');
 const logger = require('../utils/logger');
 
 async function deploySlashCommands(client = null) {
-  if (!config.token || !config.clientId) {
+  const token = (config.token && config.token !== 'your_bot_token_here') ? config.token : client?.token;
+  const clientId = (config.clientId && config.clientId !== 'your_client_id_here') ? config.clientId : client?.user?.id;
+
+  if (!token || !clientId) {
     logger.warn('Chưa có DISCORD_TOKEN hoặc CLIENT_ID. Bỏ qua việc tự động đăng ký Slash Commands.');
     return;
   }
@@ -28,14 +31,14 @@ async function deploySlashCommands(client = null) {
     }
   }
 
-  const rest = new REST({ version: '10' }).setToken(config.token);
+  const rest = new REST({ version: '10' }).setToken(token);
 
   try {
     logger.info(`Đang đồng bộ ${commands.length} application (/) commands...`);
 
     // 1. Đăng ký duy nhất danh sách Global commands
     await rest.put(
-      Routes.applicationCommands(config.clientId),
+      Routes.applicationCommands(clientId),
       { body: commands }
     );
     logger.success(`✅ Đã đăng ký thành công ${commands.length} lệnh Global cho Bot!`);
@@ -46,7 +49,7 @@ async function deploySlashCommands(client = null) {
       for (const [guildId, guild] of client.guilds.cache) {
         try {
           await rest.put(
-            Routes.applicationGuildCommands(config.clientId, guildId),
+            Routes.applicationGuildCommands(clientId, guildId),
             { body: [] }
           );
         } catch {

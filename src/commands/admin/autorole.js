@@ -1,5 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const CustomEmbed = require('../../utils/embedBuilder');
+const { PALETTE, DIVIDER } = require('../../utils/embedBuilder');
+const EMOJIS = require('../../utils/emojis');
 const guildService = require('../../database/guildService');
 
 module.exports = {
@@ -36,9 +38,17 @@ module.exports = {
       }
 
       guildService.setAutoRole(interaction.guildId, role.id);
-      return interaction.reply({
-        embeds: [CustomEmbed.success('Thiết Lập AutoRole', `Đã cài đặt: Thành viên mới tham gia sẽ tự động nhận vai trò ${role}!`)]
-      });
+      const embed = CustomEmbed.card(PALETTE.amethyst)
+        .setTitle(`${EMOJIS.vip} Kích Hoạt AutoRole Thành Công!`)
+        .setDescription(
+          `${DIVIDER}\n` +
+          `🎭 **Vai trò tân thủ:** ${role} (\`${role.name}\`)\n` +
+          `✨ Thành viên mới khi tham gia máy chủ sẽ tự động nhận vai trò này ngay lập tức!\n` +
+          `${DIVIDER}`
+        )
+        .setFooter({ text: `${interaction.guild.name} • AutoRole Active` });
+
+      return interaction.reply({ embeds: [embed] });
     }
 
     if (subcommand === 'remove') {
@@ -52,12 +62,17 @@ module.exports = {
       const config = guildService.getConfig(interaction.guildId);
       const role = config.autorole_id ? interaction.guild.roles.cache.get(config.autorole_id) : null;
 
-      const embed = CustomEmbed.info(
-        'Trạng Thái AutoRole',
-        role 
-          ? `Vai trò tự động đang được kích hoạt: ${role} (\`${role.id}\`)`
-          : 'Hiện chưa cấu hình vai trò tự động cấp cho máy chủ này.'
-      );
+      const embed = CustomEmbed.card(PALETTE.blurple)
+        .setTitle(`${EMOJIS.star} Trạng Thái Cấu Hình AutoRole`)
+        .setDescription(
+          `${DIVIDER}\n` +
+          (role 
+            ? `🎭 **Vai trò đang cấp tự động:** ${role} (\`${role.id}\`)\n✨ *Trạng thái:* \`Đang Hoạt Động (ON)\``
+            : `❌ Hiện chưa thiết lập vai trò tự động cấp cho máy chủ này.\n💡 *Gõ \`/autorole set @role\` để kích hoạt.*`) +
+          `\n${DIVIDER}`
+        )
+        .setFooter({ text: `${interaction.guild.name} • AutoRole Status` });
+
       return interaction.reply({ embeds: [embed] });
     }
   }

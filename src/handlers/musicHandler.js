@@ -4,6 +4,8 @@ const { SoundCloudPlugin } = require('@distube/soundcloud');
 const { YtDlpPlugin } = require('@distube/yt-dlp');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const CustomEmbed = require('../utils/embedBuilder');
+const { PALETTE, DIVIDER } = require('../utils/embedBuilder');
+const EMOJIS = require('../utils/emojis');
 const logger = require('../utils/logger');
 
 function createMusicButtons() {
@@ -25,7 +27,7 @@ function createMusicButtons() {
       .setStyle(ButtonStyle.Danger),
     new ButtonBuilder()
       .setCustomId('music_loop')
-      .setLabel('Chế độ lặp')
+      .setLabel('Lặp bài')
       .setEmoji('🔁')
       .setStyle(ButtonStyle.Secondary),
     new ButtonBuilder()
@@ -48,19 +50,29 @@ function initMusic(client) {
     ]
   });
 
-  // Attach distube instance to client
   client.distube = distube;
 
-  // Music Event Listeners
+  // 1. KHI BÀI HÁT BẮT ĐẦU PHÁT (NOW PLAYING EMBED TUYỆT ĐẸP)
   distube.on('playSong', (queue, song) => {
     logger.music(`Đang phát: "${song.name}" tại ${queue.textChannel?.guild?.name}`);
-    const embed = CustomEmbed.info(
-      'Đang Phát Nhạc',
-      `🎵 **[${song.name}](${song.url})**\n\n` +
-      `⏱️ **Thời lượng:** \`${song.formattedDuration}\`\n` +
-      `👤 **Yêu cầu bởi:** ${song.user}\n` +
-      `🔊 **Âm lượng:** \`${queue.volume}%\` | 🔁 **Lặp:** \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Cả hàng đợi' : 'Bài hiện tại') : 'Tắt'}\``
-    );
+    const embed = CustomEmbed.card(PALETTE.emerald)
+      .setAuthor({
+        name: `TRÌNH PHÁT NHẠC CAO CẤP • SHINDOU AUDIO`,
+        iconURL: queue.textChannel?.guild?.iconURL({ dynamic: true })
+      })
+      .setTitle(`${EMOJIS.spotify} Đang Phát: ${song.name}`)
+      .setURL(song.url)
+      .setDescription(
+        `${DIVIDER}\n` +
+        `🎵 **Bài hát:** [${song.name}](${song.url})\n` +
+        `⏱️ **Thời lượng:** \`${song.formattedDuration}\`\n` +
+        `${EMOJIS.crownOwner} **Yêu cầu bởi:** ${song.user}\n` +
+        `🔊 **Âm lượng:** \`${queue.volume}%\` | 🔁 **Chế độ lặp:** \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'Cả hàng đợi' : 'Bài hiện tại') : 'Tắt'}\`\n` +
+        `${DIVIDER}\n` +
+        `💡 *Sử dụng các nút điều khiển bên dưới để tương tác trực tiếp!*`
+      )
+      .setFooter({ text: `${queue.textChannel?.guild?.name} • Âm thanh 320kbps chất lượng cao ${EMOJIS.star}` });
+
     if (song.thumbnail) embed.setThumbnail(song.thumbnail);
 
     const row = createMusicButtons();
@@ -69,22 +81,33 @@ function initMusic(client) {
     });
   });
 
+  // 2. KHI THÊM 1 BÀI HÁT
   distube.on('addSong', (queue, song) => {
     logger.music(`Đã thêm bài hát: "${song.name}"`);
-    const embed = CustomEmbed.success(
-      'Đã Thêm Vào Hàng Đợi',
-      `🎵 **[${song.name}](${song.url})**\n⏱️ Thời lượng: \`${song.formattedDuration}\` | Yêu cầu: ${song.user}`
-    );
+    const embed = CustomEmbed.card(PALETTE.cyan)
+      .setTitle(`${EMOJIS.blueTick} Đã Thêm Vào Hàng Đợi!`)
+      .setDescription(
+        `${DIVIDER}\n` +
+        `🎶 **[${song.name}](${song.url})**\n` +
+        `⏱️ Thời lượng: \`${song.formattedDuration}\` | ${EMOJIS.purplePaw} Người yêu cầu: ${song.user}\n` +
+        `${DIVIDER}`
+      );
     if (song.thumbnail) embed.setThumbnail(song.thumbnail);
     queue.textChannel?.send({ embeds: [embed] }).catch(() => {});
   });
 
+  // 3. KHI THÊM PLAYLIST
   distube.on('addList', (queue, playlist) => {
     logger.music(`Đã thêm playlist: "${playlist.name}" (${playlist.songs.length} bài)`);
-    const embed = CustomEmbed.success(
-      'Đã Thêm Playlist Vào Hàng Đợi',
-      `🎶 **Playlist:** **[${playlist.name}](${playlist.url})**\n🔢 Số lượng bài: \`${playlist.songs.length}\` bài hát\n👤 Yêu cầu: ${playlist.user}`
-    );
+    const embed = CustomEmbed.card(PALETTE.amethyst)
+      .setTitle(`${EMOJIS.party} Đã Thêm Danh Sách Phát (Playlist)!`)
+      .setDescription(
+        `${DIVIDER}\n` +
+        `📁 **Playlist:** [${playlist.name}](${playlist.url})\n` +
+        `🔢 Số lượng bài: \`${playlist.songs.length}\` bài hát\n` +
+        `${EMOJIS.crownOwner} Yêu cầu bởi: ${playlist.user}\n` +
+        `${DIVIDER}`
+      );
     if (playlist.thumbnail) embed.setThumbnail(playlist.thumbnail);
     queue.textChannel?.send({ embeds: [embed] }).catch(() => {});
   });
@@ -93,7 +116,7 @@ function initMusic(client) {
     logger.error('Lỗi DisTube:', error);
     if (channel?.send) {
       channel.send({
-        embeds: [CustomEmbed.error('Lỗi Phát Nhạc', `Đã xảy ra lỗi khi phát nhạc: \`${error.message?.slice(0, 200)}\``)]
+        embeds: [CustomEmbed.error('Lỗi Phát Nhạc', `Đã xảy ra sự cố: \`${error.message?.slice(0, 200)}\``)]
       }).catch(() => {});
     }
   });
@@ -101,7 +124,7 @@ function initMusic(client) {
   distube.on('finish', queue => {
     logger.music(`Đã phát xong toàn bộ hàng đợi tại ${queue.textChannel?.guild?.name}`);
     queue.textChannel?.send({
-      embeds: [CustomEmbed.info('Hết Nhạc', 'Đã phát hết bài hát trong hàng đợi!')]
+      embeds: [CustomEmbed.info('Hết Danh Sách', `${EMOJIS.star} Đã phát hết toàn bộ bài hát trong hàng đợi!`)]
     }).catch(() => {});
   });
 
@@ -112,7 +135,7 @@ function initMusic(client) {
   distube.on('empty', queue => {
     logger.music(`Kênh thoại trống, tự động rời phòng tại ${queue.textChannel?.guild?.name}`);
     queue.textChannel?.send({
-      embeds: [CustomEmbed.warning('Tiết Kiệm Tài Nguyên', 'Không còn ai trong phòng thoại, bot đã rời phòng để tối ưu tài nguyên Railway!')]
+      embeds: [CustomEmbed.warning('Tiết Kiệm Băng Thông', `${EMOJIS.sparkle} Phòng thoại không còn ai, bot đã tự động rời phòng để tối ưu tài nguyên!`)]
     }).catch(() => {});
   });
 

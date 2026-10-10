@@ -1,5 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
 const CustomEmbed = require('../../utils/embedBuilder');
+const { PALETTE, DIVIDER } = require('../../utils/embedBuilder');
+const EMOJIS = require('../../utils/emojis');
 const guildService = require('../../database/guildService');
 
 module.exports = {
@@ -39,21 +41,25 @@ module.exports = {
       const channel = interaction.options.getChannel('channel');
       guildService.setWordChainChannel(interaction.guildId, channel.id);
 
-      const embed = CustomEmbed.success(
-        'Đã Kích Hoạt Kênh Nối Từ!',
-        `🎮 Kênh ${channel} đã được chọn làm kênh chơi **Minigame Nối Từ Tiếng Việt**!\n\n` +
-        `📜 **Luật chơi:**\n` +
-        `1. Mỗi từ gửi vào phải có **đúng 2 tiếng** (Ví dụ: \`con mèo\`).\n` +
-        `2. Từ sau phải bắt đầu bằng tiếng cuối của từ trước (\`con mèo\` -> \`mèo mướp\`).\n` +
-        `3. Từ phải có nghĩa trong **Từ điển Tiếng Việt** (>50.000 từ).\n` +
-        `4. Một người không được tự nối 2 lượt liên tiếp.\n` +
-        `5. Không lặp lại từ đã xuất hiện trong chuỗi hiện tại.\n\n` +
-        `👉 Hãy vào ${channel} và gửi một cụm từ 2 tiếng bất kỳ để bắt đầu chuỗi!`
-      );
+      const embed = CustomEmbed.card(PALETTE.emerald)
+        .setTitle(`${EMOJIS.party} Đấu Trường Nối Từ Tiếng Việt Đã Sẵn Sàng!`)
+        .setDescription(
+          `${DIVIDER}\n` +
+          `🎮 Kênh ${channel} đã được kích hoạt làm **Đấu Trường Nối Từ Tiếng Việt**!\n\n` +
+          `📜 **Luật Chơi Chuẩn:**\n` +
+          `${EMOJIS.sparkle} Mỗi cụm từ phải có **đúng 2 tiếng** (Ví dụ: \`con mèo\`).\n` +
+          `${EMOJIS.sparkle} Tiếng đầu của từ sau phải trùng với tiếng cuối của từ trước (\`con mèo\` ➔ \`mèo mướp\`).\n` +
+          `${EMOJIS.sparkle} Từ vựng phải có nghĩa trong **Từ điển Tiếng Việt** (>50.000 từ).\n` +
+          `${EMOJIS.sparkle} Một người không được tự nối 2 lượt liên tiếp.\n` +
+          `${EMOJIS.sparkle} Không được dùng lại từ đã xuất hiện trong chuỗi hiện tại.\n\n` +
+          `👉 *Gửi 1 từ 2 tiếng bất kỳ vào kênh này để bắt đầu chuỗi ngay bây giờ!*\n` +
+          `${DIVIDER}`
+        )
+        .setFooter({ text: `Hệ thống kiểm duyệt từ điển tự động 24/7` });
 
       await channel.send({ embeds: [embed] });
       return interaction.reply({
-        content: `✅ Đã thiết lập kênh nối từ thành công tại ${channel}!`,
+        content: `${EMOJIS.blueTick} Đã thiết lập kênh nối từ thành công tại ${channel}!`,
         ephemeral: true
       });
     }
@@ -64,15 +70,20 @@ module.exports = {
       const channelText = data.channelId ? `<#${data.channelId}>` : 'Chưa thiết lập';
       const lastUser = data.lastUserId ? `<@${data.lastUserId}>` : 'Chưa có';
 
-      const embed = CustomEmbed.info('Bảng Thống Kê Nối Từ Tiếng Việt')
-        .addFields(
-          { name: '📍 Kênh đấu trường', value: channelText, inline: true },
-          { name: '🔥 Chuỗi hiện tại', value: `\`${data.streak}\` từ`, inline: true },
-          { name: '🏆 Kỷ lục cao nhất', value: `\`${data.maxStreak}\` từ`, inline: true },
-          { name: '📝 Từ gần nhất', value: data.lastWord ? `\`${data.lastWord}\`` : 'Chưa có', inline: true },
-          { name: '👤 Người nối gần nhất', value: lastUser, inline: true },
-          { name: '📚 Số từ trong chuỗi này', value: `\`${data.usedWords.length}\` từ`, inline: true }
-        );
+      const embed = CustomEmbed.card(PALETTE.amethyst)
+        .setTitle(`${EMOJIS.party} Bảng Thống Kê Nối Từ Tiếng Việt`)
+        .setDescription(
+          `${DIVIDER}\n` +
+          `📍 **Kênh đấu trường:** ${channelText}\n` +
+          `🔥 **Chuỗi hiện tại:** \`${data.streak}\` từ liên tiếp\n` +
+          `🏆 **Kỷ lục cao nhất:** \`${data.maxStreak}\` từ\n` +
+          `${EMOJIS.purplePaw} **Từ gần nhất:** ${data.lastWord ? `\`${data.lastWord}\`` : 'Chưa có'}\n` +
+          `${EMOJIS.crownOwner} **Người nối gần nhất:** ${lastUser}\n` +
+          `📚 **Tổng từ đã nối:** \`${data.usedWords.length}\` từ vựng\n` +
+          `${DIVIDER}\n` +
+          `💡 *Gửi từ 2 tiếng vào ${channelText} để tiếp tục nâng cao chuỗi điểm!*`
+        )
+        .setFooter({ text: `${interaction.guild.name} • Minigame Nối Từ`, iconURL: interaction.guild.iconURL({ dynamic: true }) });
 
       return interaction.reply({ embeds: [embed] });
     }

@@ -1,5 +1,7 @@
 const { SlashCommandBuilder } = require('discord.js');
 const CustomEmbed = require('../../utils/embedBuilder');
+const { PALETTE, DIVIDER } = require('../../utils/embedBuilder');
+const EMOJIS = require('../../utils/emojis');
 const { createMusicButtons } = require('../../handlers/musicHandler');
 
 module.exports = {
@@ -18,15 +20,23 @@ module.exports = {
     }
 
     const song = queue.songs[0];
-    const embed = CustomEmbed.info(
-      'Đang Phát Hiện Tại',
-      `🎵 **[${song.name}](${song.url})**\n\n` +
-      `⏱️ **Tiến trình:** \`${queue.formattedCurrentTime} / ${song.formattedDuration}\`\n` +
-      `👤 **Yêu cầu bởi:** ${song.user}\n` +
-      `🔊 **Âm lượng:** \`${queue.volume}%\`\n` +
-      `🔁 **Chế độ lặp:** \`${queue.repeatMode === 2 ? 'Lặp cả hàng đợi' : queue.repeatMode === 1 ? 'Lặp bài hát này' : 'Tắt'}\`\n` +
-      `⏯️ **Trạng thái:** \`${queue.paused ? 'Đang tạm dừng' : 'Đang phát'}\``
-    );
+    const embed = CustomEmbed.card(PALETTE.emerald)
+      .setAuthor({
+        name: `TRÌNH PHÁT NHẠC CAO CẤP • SHINDOU AUDIO`,
+        iconURL: interaction.guild.iconURL({ dynamic: true })
+      })
+      .setTitle(`${EMOJIS.spotify} Đang Phát: ${song.name}`)
+      .setURL(song.url)
+      .setDescription(
+        `${DIVIDER}\n` +
+        `🎵 **Bài hát:** [${song.name}](${song.url})\n` +
+        `⏱️ **Tiến trình:** \`${queue.formattedCurrentTime} / ${song.formattedDuration}\`\n` +
+        `${EMOJIS.crownOwner} **Yêu cầu bởi:** ${song.user}\n` +
+        `🔊 **Âm lượng:** \`${queue.volume}%\` | 🔁 **Lặp:** \`${queue.repeatMode === 2 ? 'Cả hàng đợi' : queue.repeatMode === 1 ? 'Bài này' : 'Tắt'}\`\n` +
+        `⏯️ **Trạng thái:** \`${queue.paused ? 'Tạm dừng' : 'Đang phát'}\`\n` +
+        `${DIVIDER}`
+      )
+      .setFooter({ text: `${interaction.guild.name} • 320kbps High Fidelity Audio ${EMOJIS.star}` });
 
     if (song.thumbnail) embed.setThumbnail(song.thumbnail);
 
