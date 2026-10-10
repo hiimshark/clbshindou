@@ -17,6 +17,7 @@ function loadCommands(client) {
       try {
         const command = require(filePath);
         if ('data' in command && 'execute' in command) {
+          command.category = folder;
           client.commands.set(command.data.name, command);
           loadedCount++;
         } else {

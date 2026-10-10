@@ -1,8 +1,23 @@
+const { PermissionFlagsBits } = require('discord.js');
+const { config } = require('../../config');
 const CustomEmbed = require('../../utils/embedBuilder');
 
 module.exports = {
   customIdPrefix: 'music_',
   async execute(interaction, client) {
+    const member = interaction.member;
+    const isAdmin = member?.roles?.cache?.has(config.roles.admin) || 
+                    member?.permissions?.has(PermissionFlagsBits.Administrator) ||
+                    interaction.guild?.ownerId === interaction.user.id;
+    const hasMusicRole = member?.roles?.cache?.has(config.roles.music);
+
+    if (!isAdmin && !hasMusicRole) {
+      return interaction.reply({
+        embeds: [CustomEmbed.error('Thiếu Quyền Thao Tác', `Bạn cần có vai trò <@&${config.roles.music}> để điều khiển trình phát nhạc!`)],
+        ephemeral: true
+      });
+    }
+
     const queue = client.distube.getQueue(interaction.guildId);
     const memberVoiceChannel = interaction.member.voice?.channel;
 

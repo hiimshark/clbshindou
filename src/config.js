@@ -12,8 +12,11 @@ const config = {
   defaultColor: 0x5865F2, // Discord Blurple
   successColor: 0x57F287, // Green
   errorColor: 0xED4245,   // Red
-  warningColor: 0xFEE75C, // Yellow
   ticketCategoryName: 'TICKETS',
+  roles: {
+    music: process.env.MUSIC_ROLE_ID || '1374822029278183607',
+    admin: process.env.ADMIN_ROLE_ID || '1374822029454475378'
+  }
 };
 
 // Validate critical config
