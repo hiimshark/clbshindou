@@ -1,6 +1,7 @@
 const { ChannelType, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const CustomEmbed = require('../../utils/embedBuilder');
 const { PALETTE, DIVIDER } = require('../../utils/embedBuilder');
+const EMOJIS = require('../../utils/emojis');
 const guildService = require('../../database/guildService');
 const logger = require('../../utils/logger');
 
@@ -95,14 +96,14 @@ module.exports = {
           name: `YÊU CẦU HỖ TRỢ RIÊNG TƯ`,
           iconURL: interaction.user.displayAvatarURL({ dynamic: true })
         })
-        .setTitle(`🛎️ Phòng Hỗ Trợ: #${channelName}`)
+        .setTitle(`${EMOJIS.crownPink} Phòng Hỗ Trợ: #${channelName} ${EMOJIS.sparkle}`)
         .setDescription(
           `Xin chào ${interaction.user}! Yêu cầu hỗ trợ của bạn đã được chuyển tới Ban Quản Trị.\n\n` +
           `${DIVIDER}\n` +
           `📝 **CHI TIẾT VẤN ĐỀ CỦA BẠN:**\n` +
           `> *${reason}*\n\n` +
-          `👤 **Người tạo ticket:** ${interaction.user} (\`${interaction.user.id}\`)\n` +
-          `🛡️ **Đội ngũ tiếp nhận:** ${config.ticket_staff_role_id ? `<@&${config.ticket_staff_role_id}>` : 'Ban Quản Trị'}\n` +
+          `${EMOJIS.purplePaw} **Người tạo ticket:** ${interaction.user} (\`${interaction.user.id}\`)\n` +
+          `${EMOJIS.vip} **Đội ngũ tiếp nhận:** ${config.ticket_staff_role_id ? `<@&${config.ticket_staff_role_id}>` : 'Ban Quản Trị'}\n` +
           `⏰ **Thời gian mở:** <t:${Math.floor(Date.now() / 1000)}:F>\n` +
           `${DIVIDER}\n` +
           `💡 *Vui lòng gửi mô tả chi tiết, hình ảnh hoặc video bằng chứng để được xử lý nhanh nhất.*\n` +
@@ -120,7 +121,7 @@ module.exports = {
       logger.ticket(`Tạo ticket mới: ${channelName} (${ticketChannel.id}) cho user ${interaction.user.tag}`);
 
       return interaction.editReply({
-        content: `🎉 Ticket hỗ trợ của bạn đã được khởi tạo thành công! Hãy bấm vào đây để chuyển tới kênh: <#${ticketChannel.id}>`
+        content: `${EMOJIS.blueTick} Ticket hỗ trợ của bạn đã được khởi tạo thành công! Hãy bấm vào đây để chuyển tới kênh: <#${ticketChannel.id}>`
       });
     } catch (err) {
       logger.error('Lỗi khi tạo kênh ticket:', err);

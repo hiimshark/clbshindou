@@ -8,6 +8,7 @@ const {
 } = require('discord.js');
 const CustomEmbed = require('../../utils/embedBuilder');
 const { PALETTE, DIVIDER } = require('../../utils/embedBuilder');
+const EMOJIS = require('../../utils/emojis');
 const guildService = require('../../database/guildService');
 
 module.exports = {
@@ -66,27 +67,28 @@ module.exports = {
       // Bảng Embed Mở Ticket Lộng Lẫy & Chuyên Nghiệp
       const ticketEmbed = CustomEmbed.card(PALETTE.blurple)
         .setAuthor({
-          name: `TRUNG TÂM DỊCH VỤ & CHĂM SÓC THÀNH VIÊN`,
+          name: `TRUNG TÂM DỊCH VỤ & CHĂM SÓC KHÁCH HÀNG`,
           iconURL: interaction.guild.iconURL({ dynamic: true })
         })
-        .setTitle('🎫 YÊU CẦU HỖ TRỢ KỸ THUẬT & CSKH 🎫')
+        .setTitle(`${EMOJIS.crownOwner} YÊU CẦU HỖ TRỢ KỸ THUẬT & DỊCH VỤ ${EMOJIS.star}`)
         .setDescription(
           `Chào mừng bạn đến với kênh hỗ trợ chính thức của **${interaction.guild.name}**!\n\n` +
           `${DIVIDER}\n` +
-          `📌 **HƯỚNG DẪN MỞ TICKET:**\n` +
+          `${EMOJIS.pin} **HƯỚNG DẪN MỞ TICKET:**\n` +
           `• Nhấn vào nút **[📩 Mở Ticket Hỗ Trợ]** màu xanh bên dưới.\n` +
           `• Nhập lý do hoặc vấn đề bạn cần giải quyết vào khung popup.\n` +
           `• Hệ thống sẽ tạo một kênh chat riêng tư hoàn toàn chỉ giữa bạn và Ban Quản Trị.\n\n` +
-          `⏱️ **THỜI GIAN LÀM VIỆC & PHẢN HỒI:**\n` +
+          `${EMOJIS.blueTick} **DỊCH VỤ HỖ TRỢ:**\n` +
+          `• Hỗ trợ kỹ thuật, giải đáp thắc mắc, giao dịch uy tín.\n` +
           `• Đội ngũ Admin & Staff sẽ phản hồi bạn trong thời gian sớm nhất!\n\n` +
-          `⚠️ **NỘI QUY CHUNG:**\n` +
+          `${EMOJIS.redTick} **NỘI QUY CHUNG:**\n` +
           `• Vui lòng mô tả vấn đề rõ ràng, gửi kèm ảnh chụp màn hình nếu có.\n` +
           `• Nghiêm cấm tạo ticket với mục đích quấy rối, quảng cáo hoặc spam.\n` +
           `${DIVIDER}`
         )
         .setThumbnail(interaction.guild.iconURL({ dynamic: true, size: 256 }))
         .setFooter({ 
-          text: `${interaction.guild.name} Support System • Luôn sẵn sàng đồng hành cùng bạn! 💖`, 
+          text: `${interaction.guild.name} Support System • Luôn sẵn sàng phục vụ bạn!`, 
           iconURL: interaction.guild.iconURL({ dynamic: true }) 
         });
 

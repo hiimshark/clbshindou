@@ -11,6 +11,7 @@ const {
 } = require('discord.js');
 const CustomEmbed = require('../../utils/embedBuilder');
 const { PALETTE, DIVIDER } = require('../../utils/embedBuilder');
+const EMOJIS = require('../../utils/emojis');
 const guildService = require('../../database/guildService');
 const transcriptUtil = require('../../utils/transcript');
 const logger = require('../../utils/logger');
@@ -80,10 +81,10 @@ module.exports = {
           name: `TRẠNG THÁI TICKET: ĐÃ ĐÓNG`,
           iconURL: interaction.guild.iconURL({ dynamic: true })
         })
-        .setTitle('🔒 Ticket Đã Được Khóa Thành Công!')
+        .setTitle(`${EMOJIS.redTick} Ticket Đã Được Khóa Thành Công!`)
         .setDescription(
           `${DIVIDER}\n` +
-          `👤 **Người thực hiện đóng:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
+          `${EMOJIS.crownOwner} **Người thực hiện đóng:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
           `⏰ **Thời gian đóng:** <t:${Math.floor(Date.now() / 1000)}:F>\n\n` +
           `📋 **TRẠNG THÁI KÊNH:**\n` +
           `• Thành viên mở ticket đã bị thu hồi quyền gửi tin nhắn mới.\n` +
@@ -105,7 +106,7 @@ module.exports = {
 
         // Send to channel
         await interaction.editReply({
-          content: `✅ Đã xuất thành công file nhật ký tin nhắn của ticket **#${interaction.channel.name}**:`,
+          content: `${EMOJIS.blueTick} Đã xuất thành công file nhật ký tin nhắn của ticket **#${interaction.channel.name}**:`,
           files: [attachment]
         });
 
@@ -132,7 +133,7 @@ module.exports = {
     // 4. XÓA KÊNH TICKET
     if (customId === 'ticket_delete') {
       await interaction.reply({
-        embeds: [CustomEmbed.warning('Đang Xóa Kênh', 'Kênh hỗ trợ này sẽ tự động bị xóa vĩnh viễn sau **5 giây**... ⏳')]
+        embeds: [CustomEmbed.warning('Đang Xóa Kênh', `${EMOJIS.sparkle} Kênh hỗ trợ này sẽ tự động bị xóa vĩnh viễn sau **5 giây**... ⏳`)]
       });
 
       setTimeout(async () => {

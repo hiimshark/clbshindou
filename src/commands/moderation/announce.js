@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
 const CustomEmbed = require('../../utils/embedBuilder');
 const { PALETTE, DIVIDER } = require('../../utils/embedBuilder');
+const EMOJIS = require('../../utils/emojis');
 
 const COLOR_MAP = {
   blue: PALETTE.blurple,
@@ -71,21 +72,21 @@ module.exports = {
 
     const embed = CustomEmbed.card(COLOR_MAP[colorKey] || PALETTE.blurple)
       .setAuthor({
-        name: `📢 THÔNG BÁO TỪ BAN QUẢN TRỊ • ${interaction.guild.name.toUpperCase()}`,
+        name: `THÔNG BÁO TỪ BAN QUẢN TRỊ • ${interaction.guild.name.toUpperCase()}`,
         iconURL: interaction.guild.iconURL({ dynamic: true })
       })
-      .setTitle(`✨ ${title} ✨`)
+      .setTitle(`${EMOJIS.crownPink} ${title} ${EMOJIS.sparkle}`)
       .setDescription(
         `${DIVIDER}\n\n` +
         `${content}\n\n` +
         `${DIVIDER}`
       )
       .addFields(
-        { name: '👮 Người đăng', value: `${interaction.user} (\`${interaction.user.tag}\`)`, inline: true },
-        { name: '⏰ Thời gian', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: true }
+        { name: `${EMOJIS.crownOwner} Người đăng`, value: `${interaction.user} (\`${interaction.user.tag}\`)`, inline: true },
+        { name: `${EMOJIS.pin} Thời gian`, value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: true }
       )
       .setFooter({
-        text: `${interaction.guild.name} Official Announcement • Hãy tương tác nếu bạn đã đọc nhé! 💬`,
+        text: `${interaction.guild.name} Official Announcement • Hãy tương tác nếu bạn đã đọc nhé!`,
         iconURL: interaction.guild.iconURL({ dynamic: true })
       });
 
@@ -104,7 +105,7 @@ module.exports = {
       });
 
       await interaction.reply({
-        embeds: [CustomEmbed.success('Gửi Thông Báo Thành Công', `✅ Đã đăng thông báo thành công vào kênh ${channel}!`)],
+        embeds: [CustomEmbed.success('Gửi Thông Báo Thành Công', `${EMOJIS.blueTick} Đã đăng thông báo thành công vào kênh ${channel}!`)],
         ephemeral: true
       });
     } catch (err) {

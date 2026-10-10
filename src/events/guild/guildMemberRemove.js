@@ -1,5 +1,6 @@
 const CustomEmbed = require('../../utils/embedBuilder');
 const { PALETTE, DIVIDER } = require('../../utils/embedBuilder');
+const EMOJIS = require('../../utils/emojis');
 const guildService = require('../../database/guildService');
 const logger = require('../../utils/logger');
 
@@ -8,7 +9,7 @@ module.exports = {
   async execute(member, client) {
     const config = guildService.getConfig(member.guild.id);
 
-    // GỬI THÔNG BÁO TẠM BIỆT (GOODBYE EMBED SANG TRỌNG)
+    // GỬI THÔNG BÁO TẠM BIỆT (GOODBEYE EMBED)
     if (config.goodbye_channel_id) {
       try {
         const channel = member.guild.channels.cache.get(config.goodbye_channel_id);
@@ -26,21 +27,21 @@ module.exports = {
 
           const embed = CustomEmbed.card(PALETTE.ruby)
             .setAuthor({
-              name: `🕊️ THÀNH VIÊN RỜI MÁY CHỦ`,
+              name: `THÀNH VIÊN RỜI MÁY CHỦ`,
               iconURL: member.guild.iconURL({ dynamic: true })
             })
-            .setTitle(`🥀 Tạm biệt ${member.user?.username || member.displayName}...`)
+            .setTitle(`${EMOJIS.brownBow} Tạm biệt ${member.user?.username || member.displayName}...`)
             .setDescription(
               `${DIVIDER}\n` +
               `> ${formattedMessage}\n` +
               `${DIVIDER}`
             )
             .addFields(
-              { name: '👤 Tài khoản', value: `${member.user ? member.user.tag : member.displayName}`, inline: true },
-              { name: '🆔 ID', value: `\`${member.id}\``, inline: true },
-              { name: '👥 Thành viên còn lại', value: `\`${member.guild.memberCount}\` thành viên`, inline: true },
+              { name: `${EMOJIS.purplePaw} Tài khoản`, value: `${member.user ? member.user.tag : member.displayName}`, inline: true },
+              { name: `${EMOJIS.sparkle} ID`, value: `\`${member.id}\``, inline: true },
+              { name: `${EMOJIS.vip} Còn lại`, value: `\`${member.guild.memberCount}\` thành viên`, inline: true },
               ...(joinedTimestamp ? [{ 
-                name: '⏳ Đã đồng hành cùng máy chủ từ', 
+                name: `${EMOJIS.pin} Đã đồng hành từ`, 
                 value: `<t:${joinedTimestamp}:D> (<t:${joinedTimestamp}:R>)`, 
                 inline: false 
               }] : [])
