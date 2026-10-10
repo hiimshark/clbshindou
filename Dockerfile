@@ -1,6 +1,6 @@
 FROM node:20-bookworm-slim
 
-# Cài đặt ffmpeg cho phát nhạc và build tools cho native SQLite
+# Cài đặt ffmpeg cho phát nhạc và build tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     python3 \
@@ -13,16 +13,15 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Cài đặt dependencies môi trường production
-RUN npm ci --omit=dev
+# Cài đặt dependencies (sử dụng npm install để tự động build native addon tương thích Linux)
+RUN npm install --omit=dev
 
 # Copy toàn bộ mã nguồn
 COPY . .
 
-# Tạo thư mục data cho SQLite (gắn Railway Volume tại đây)
+# Tạo thư mục data
 RUN mkdir -p /app/data
 
-# Thiết lập biến môi trường mặc định
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV DATABASE_PATH=/app/data/database.sqlite

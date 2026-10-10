@@ -1,3 +1,11 @@
+// Đặt bộ bắt lỗi toàn cục lên ĐẦU TIÊN để không bỏ sót bất kỳ lỗi khởi động nào
+process.on('uncaughtException', (err, origin) => {
+  console.error(`[FATAL] Uncaught Exception:`, err.stack || err.message, `(${origin})`);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[FATAL] Unhandled Rejection:', reason);
+});
+
 const http = require('http');
 const { config, validateConfig } = require('./config');
 const logger = require('./utils/logger');
@@ -8,31 +16,40 @@ const { initMusic } = require('./handlers/musicHandler');
 const { loadCommands } = require('./handlers/commandHandler');
 const { loadEvents } = require('./handlers/eventHandler');
 
+logger.info('Đang khởi động bot trên môi trường:', process.env.NODE_ENV || 'development');
+
 // 1. Kiểm tra cấu hình môi trường
 validateConfig();
 
-// 2. Khởi tạo Cơ sở dữ liệu SQLite
+// 2. Khởi tạo Cơ sở dữ liệu
 try {
   initDatabase();
 } catch (err) {
-  logger.error('Không thể khởi tạo cơ sở dữ liệu SQLite:', err);
-  process.exit(1);
+  logger.error('Lỗi khởi tạo cơ sở dữ liệu:', err);
 }
 
-// 3. Nạp trước từ điển tiếng Việt vào bộ nhớ RAM
-vietnameseDict.init();
+// 3. Nạp trước từ điển tiếng Việt
+try {
+  vietnameseDict.init();
+} catch (err) {
+  logger.warn('Lỗi khi nạp từ điển:', err.message);
+}
 
 // 4. Khởi tạo Discord Client
 const client = createDiscordClient();
 
 // 5. Khởi tạo hệ thống Âm nhạc DisTube
-initMusic(client);
+try {
+  initMusic(client);
+} catch (err) {
+  logger.error('Lỗi khởi tạo DisTube:', err);
+}
 
 // 6. Nạp toàn bộ Slash Commands và Events
 loadCommands(client);
 loadEvents(client);
 
-// 7. Mini HTTP Healthcheck Server (Phục vụ treo 24/24 trên Railway & Uptime Monitoring)
+// 7. Mini HTTP Healthcheck Server (Bắt buộc bind vào 0.0.0.0 cho Docker Container Railway)
 const server = http.createServer((req, res) => {
   if (req.url === '/' || req.url === '/health' || req.url === '/status') {
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -50,24 +67,16 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(config.port, () => {
-  logger.info(`Healthcheck HTTP Server đang lắng nghe tại cổng ${config.port} (Treo 24/24 trên Railway)`);
+const listenPort = config.port;
+server.listen(listenPort, '0.0.0.0', () => {
+  logger.info(`Healthcheck HTTP Server đang lắng nghe tại 0.0.0.0:${listenPort} (Railway 24/7)`);
 });
 
 // 8. Đăng nhập Discord Bot
 if (config.token) {
   client.login(config.token).catch(err => {
-    logger.error('Đăng nhập Discord thất bại! Kiểm tra lại DISCORD_TOKEN trong .env:', err.message);
+    logger.error('Đăng nhập Discord thất bại! Kiểm tra DISCORD_TOKEN và Privileged Intents:', err.message);
   });
 } else {
   logger.warn('Chưa cấu hình DISCORD_TOKEN. Bot đang chờ điền token để kết nối Discord Gateway.');
 }
-
-// 9. Phòng chống Crash toàn cục (Tối ưu tính ổn định 24/7)
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection tại:', promise, 'lý do:', reason);
-});
-
-process.on('uncaughtException', (err, origin) => {
-  logger.error(`Uncaught Exception: ${err.message} (${origin})`);
-});
