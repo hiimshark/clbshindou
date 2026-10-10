@@ -131,13 +131,6 @@ function initMusic(client) {
     logger.music(`Đã ngắt kết nối voice tại ${queue.textChannel?.guild?.name}`);
   });
 
-  distube.on('empty', queue => {
-    logger.music(`Kênh thoại trống, tự động rời phòng tại ${queue.textChannel?.guild?.name}`);
-    queue.textChannel?.send({
-      embeds: [CustomEmbed.warning('Tiết Kiệm Băng Thông', `${EMOJIS.sparkle} Phòng thoại không còn ai, bot đã tự động rời phòng để tối ưu tài nguyên!`)]
-    }).catch(() => {});
-  });
-
   logger.info('Hệ thống âm nhạc DisTube đã sẵn sàng với YouTube, Spotify và SoundCloud!');
   return distube;
 }
