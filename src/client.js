@@ -24,6 +24,17 @@ function createDiscordClient() {
   client.buttons = new Collection();
   client.modals = new Collection();
 
+  // Bắt toàn bộ lỗi Gateway để không bao giờ bị crash
+  client.on('error', err => {
+    console.error('[Discord Client Error]:', err);
+  });
+  client.on('shardError', (err, shardId) => {
+    console.error(`[Discord Shard ${shardId} Error]:`, err);
+  });
+  client.on('warn', info => {
+    console.warn('[Discord Client Warning]:', info);
+  });
+
   return client;
 }
 

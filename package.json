@@ -24,7 +24,6 @@
     "@distube/spotify": "^2.0.2",
     "@distube/yt-dlp": "^2.0.1",
     "@distube/ytdl-core": "^4.16.12",
-    "better-sqlite3": "^13.0.3",
     "discord.js": "^14.27.0",
     "distube": "^5.2.3",
     "dotenv": "^18.0.7",

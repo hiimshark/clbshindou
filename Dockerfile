@@ -1,11 +1,8 @@
 FROM node:20-bookworm-slim
 
-# Cài đặt ffmpeg cho phát nhạc và build tools
+# Cài đặt ffmpeg cho tính năng phát nhạc
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
-    python3 \
-    make \
-    g++ \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -13,7 +10,7 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Cài đặt dependencies (sử dụng npm install để tự động build native addon tương thích Linux)
+# Cài đặt dependencies nhanh gọn không cần compile C++
 RUN npm install --omit=dev
 
 # Copy toàn bộ mã nguồn
@@ -24,7 +21,7 @@ RUN mkdir -p /app/data
 
 ENV NODE_ENV=production
 ENV PORT=3000
-ENV DATABASE_PATH=/app/data/database.sqlite
+ENV DATABASE_PATH=/app/data/database.json
 
 EXPOSE 3000
 
