@@ -30,5 +30,8 @@
     "ffmpeg-static": "^5.3.0",
     "libsodium-wrappers": "^0.8.4",
     "opusscript": "^0.0.8"
+  },
+  "optionalDependencies": {
+    "@discordjs/opus": "^0.10.0"
   }
 }

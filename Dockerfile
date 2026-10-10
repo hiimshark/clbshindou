@@ -1,10 +1,12 @@
 FROM node:20-bookworm-slim
 
-# Cài đặt ffmpeg và yt-dlp cho tính năng phát nhạc YouTube tốc độ cao
+# Cài đặt ffmpeg, yt-dlp và build tools cho codec âm thanh Opus gốc siêu mượt
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ffmpeg \
     curl \
     ca-certificates \
+    build-essential \
+    python3 \
     && curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o /usr/local/bin/yt-dlp \
     && chmod a+rx /usr/local/bin/yt-dlp \
     && rm -rf /var/lib/apt/lists/*

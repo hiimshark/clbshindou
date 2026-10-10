@@ -43,11 +43,42 @@ function initMusic(client) {
     emitNewSongOnly: true,
     emitAddSongWhenCreatingQueue: false,
     emitAddListWhenCreatingQueue: false,
+    ffmpeg: {
+      args: {
+        global: {
+          loglevel: 'warning'
+        },
+        input: {
+          reconnect: 1,
+          reconnect_streamed: 1,
+          reconnect_at_eof: 1,
+          reconnect_delay_max: 5,
+          rw_timeout: 15000000,
+          user_agent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
+      }
+    },
     plugins: [
       new SpotifyPlugin(),
       new CustomYtDlpPlugin(),
       new SoundCloudPlugin()
     ]
+  });
+
+  // Tăng bộ đệm khung hình voice chống giật lag âm thanh (từ 5 frames = 100ms lên 250 frames = 5s)
+  const originalVoiceCreate = distube.voices.create.bind(distube.voices);
+  distube.voices.create = function(channel) {
+    const voice = originalVoiceCreate(channel);
+    if (voice.audioPlayer?.behaviors) {
+      voice.audioPlayer.behaviors.maxMissedFrames = 250;
+    }
+    return voice;
+  };
+
+  distube.on('initQueue', queue => {
+    if (queue.voice?.audioPlayer?.behaviors) {
+      queue.voice.audioPlayer.behaviors.maxMissedFrames = 250;
+    }
   });
 
   client.distube = distube;
