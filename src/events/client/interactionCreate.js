@@ -66,6 +66,26 @@ module.exports = {
         }
       }
 
+      // KIỂM TRA PHÒNG THOẠI CHO LỆNH NHẠC (CHỈ ADMIN MỚI ĐƯỢC KÉO BOT SANG PHÒNG KHÁC)
+      if (command.category === 'music') {
+        const botVoice = interaction.guild?.members.me?.voice?.channel;
+        const memberVoice = member?.voice?.channel;
+
+        if (botVoice && (!memberVoice || memberVoice.id !== botVoice.id)) {
+          if (!isAdmin) {
+            return interaction.reply({
+              embeds: [CustomEmbed.error(
+                'Phòng Thoại Không Hợp Lệ',
+                `🚫 **BOT ĐANG Ở ROOM KHÁC, CHỈ ADMIN MỚI ĐƯỢC KÉO BOT NHẠC!**\n\n` +
+                `📍 Bot hiện đang ở phòng: ${botVoice}\n` +
+                `💡 Bạn vui lòng tham gia vào ${botVoice} để cùng thưởng thức nhạc nhé!`
+              )],
+              ephemeral: true
+            });
+          }
+        }
+      }
+
       try {
         await command.execute(interaction, client);
       } catch (error) {

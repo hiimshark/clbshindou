@@ -18,8 +18,21 @@ module.exports = {
       });
     }
 
-    const queue = client.distube.getQueue(interaction.guildId);
+    const botVoice = interaction.guild?.members.me?.voice?.channel;
     const memberVoiceChannel = interaction.member.voice?.channel;
+
+    if (botVoice && (!memberVoiceChannel || memberVoiceChannel.id !== botVoice.id)) {
+      if (!isAdmin) {
+        return interaction.reply({
+          embeds: [CustomEmbed.error(
+            'Phòng Thoại Không Hợp Lệ',
+            `🚫 **BOT ĐANG Ở ROOM KHÁC, CHỈ ADMIN MỚI ĐƯỢC KÉO BOT NHẠC!**\n\n` +
+            `📍 Bot hiện đang ở phòng: ${botVoice}`
+          )],
+          ephemeral: true
+        });
+      }
+    }
 
     if (!memberVoiceChannel) {
       return interaction.reply({

@@ -1,4 +1,5 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { config } = require('../../config');
 const CustomEmbed = require('../../utils/embedBuilder');
 
 module.exports = {
@@ -22,12 +23,23 @@ module.exports = {
       });
     }
 
-    const botVoice = interaction.guild.members.me.voice.channel;
+    const botVoice = interaction.guild.members.me?.voice?.channel;
+    const isAdmin = interaction.member?.roles?.cache?.has(config.roles.admin) || 
+                    interaction.member?.permissions?.has(PermissionFlagsBits.Administrator) ||
+                    interaction.guild?.ownerId === interaction.user.id;
+
     if (botVoice && botVoice.id !== voiceChannel.id) {
-      return interaction.reply({
-        embeds: [CustomEmbed.error('Lỗi', `Bot đang phát nhạc tại phòng khác (${botVoice})! Vui lòng tham gia cùng phòng.`)],
-        ephemeral: true
-      });
+      if (!isAdmin) {
+        return interaction.reply({
+          embeds: [CustomEmbed.error(
+            'Phòng Thoại Không Hợp Lệ',
+            `🚫 **BOT ĐANG Ở ROOM KHÁC, CHỈ ADMIN MỚI ĐƯỢC KÉO BOT NHẠC!**\n\n` +
+            `📍 Bot hiện đang ở phòng: ${botVoice}\n` +
+            `💡 Bạn vui lòng tham gia vào ${botVoice} để cùng thưởng thức nhạc nhé!`
+          )],
+          ephemeral: true
+        });
+      }
     }
 
     await interaction.deferReply();
