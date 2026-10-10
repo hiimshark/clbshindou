@@ -31,34 +31,29 @@ async function deploySlashCommands(client = null) {
   const rest = new REST({ version: '10' }).setToken(config.token);
 
   try {
-    logger.info(`Bắt đầu đăng ký ${commands.length} application (/) commands...`);
+    logger.info(`Đang đồng bộ ${commands.length} application (/) commands...`);
 
-    // 1. Đăng ký Global commands
+    // 1. Đăng ký duy nhất danh sách Global commands
     await rest.put(
       Routes.applicationCommands(config.clientId),
       { body: commands }
     );
-    logger.success(`Đã đăng ký ${commands.length} lệnh Global cho Bot!`);
+    logger.success(`✅ Đã đăng ký thành công ${commands.length} lệnh Global cho Bot!`);
 
-    // 2. Đăng ký TỨC THÌ (Instant Guild Commands) cho tất cả server bot đang tham gia
+    // 2. CHỐNG NHÂN ĐÔI LỆNH (DEDUPLICATION):
+    // Xóa toàn bộ Guild Commands cũ còn sót lại trên các server để Discord không hiển thị x2 lệnh
     if (client && client.guilds && client.guilds.cache.size > 0) {
       for (const [guildId, guild] of client.guilds.cache) {
         try {
           await rest.put(
             Routes.applicationGuildCommands(config.clientId, guildId),
-            { body: commands }
+            { body: [] }
           );
-          logger.success(`⚡ Đã đồng bộ ${commands.length} lệnh tức thì cho máy chủ: ${guild.name} (${guildId})!`);
-        } catch (guildErr) {
-          logger.warn(`Không thể đăng ký lệnh riêng cho guild ${guild.name}:`, guildErr.message);
+        } catch {
+          // Bỏ qua nếu không có quyền can thiệp guild
         }
       }
-    } else if (config.devGuildId) {
-      await rest.put(
-        Routes.applicationGuildCommands(config.clientId, config.devGuildId),
-        { body: commands }
-      );
-      logger.success(`Đã đăng ký lệnh cho Dev Guild: ${config.devGuildId}`);
+      logger.success(`🧹 Đã dọn dẹp toàn bộ Guild commands thừa trên ${client.guilds.cache.size} máy chủ để tránh bị double lệnh!`);
     }
   } catch (error) {
     logger.error('Lỗi khi đăng ký Slash Commands với Discord REST API:', error);

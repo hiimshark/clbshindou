@@ -1,5 +1,6 @@
 const { ChannelType, PermissionFlagsBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const CustomEmbed = require('../../utils/embedBuilder');
+const { PALETTE, DIVIDER } = require('../../utils/embedBuilder');
 const guildService = require('../../database/guildService');
 const logger = require('../../utils/logger');
 
@@ -8,7 +9,7 @@ module.exports = {
   async execute(interaction, client) {
     await interaction.deferReply({ ephemeral: true });
 
-    const reason = interaction.fields.getTextInputValue('ticket_reason') || 'Không cung cấp lý do';
+    const reason = interaction.fields.getTextInputValue('ticket_reason') || 'Không cung cấp lý do cụ thể';
     const config = guildService.getConfig(interaction.guildId);
 
     // Permission overwrites
@@ -72,7 +73,7 @@ module.exports = {
 
       const ticketChannel = await interaction.guild.channels.create(channelOptions);
 
-      // Save to SQLite
+      // Save to Database
       guildService.createTicket(ticketChannel.id, interaction.guildId, interaction.user.id, reason);
 
       // Buttons inside ticket channel
@@ -89,12 +90,26 @@ module.exports = {
           .setStyle(ButtonStyle.Secondary)
       );
 
-      const welcomeEmbed = CustomEmbed.info(
-        `Ticket Hỗ Trợ: #${channelName}`,
-        `Xin chào ${interaction.user}! Đội ngũ hỗ trợ sẽ sớm có mặt để giải quyết yêu cầu của bạn.\n\n` +
-        `📝 **Lý do yêu cầu:**\n> ${reason}\n\n` +
-        `*Nhấn vào nút bên dưới khi bạn đã được hỗ trợ xong hoặc muốn đóng ticket.*`
-      );
+      const welcomeEmbed = CustomEmbed.card(PALETTE.cyan)
+        .setAuthor({
+          name: `YÊU CẦU HỖ TRỢ RIÊNG TƯ`,
+          iconURL: interaction.user.displayAvatarURL({ dynamic: true })
+        })
+        .setTitle(`🛎️ Phòng Hỗ Trợ: #${channelName}`)
+        .setDescription(
+          `Xin chào ${interaction.user}! Yêu cầu hỗ trợ của bạn đã được chuyển tới Ban Quản Trị.\n\n` +
+          `${DIVIDER}\n` +
+          `📝 **CHI TIẾT VẤN ĐỀ CỦA BẠN:**\n` +
+          `> *${reason}*\n\n` +
+          `👤 **Người tạo ticket:** ${interaction.user} (\`${interaction.user.id}\`)\n` +
+          `🛡️ **Đội ngũ tiếp nhận:** ${config.ticket_staff_role_id ? `<@&${config.ticket_staff_role_id}>` : 'Ban Quản Trị'}\n` +
+          `⏰ **Thời gian mở:** <t:${Math.floor(Date.now() / 1000)}:F>\n` +
+          `${DIVIDER}\n` +
+          `💡 *Vui lòng gửi mô tả chi tiết, hình ảnh hoặc video bằng chứng để được xử lý nhanh nhất.*\n` +
+          `*Khi vấn đề đã được giải quyết, nhấn nút **[🔒 Đóng Ticket]** phía dưới!*`
+        )
+        .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
+        .setFooter({ text: `Hệ thống hỗ trợ bảo mật • ${interaction.guild.name}` });
 
       await ticketChannel.send({
         content: `${interaction.user} ${config.ticket_staff_role_id ? `<@&${config.ticket_staff_role_id}>` : ''}`,
@@ -105,12 +120,12 @@ module.exports = {
       logger.ticket(`Tạo ticket mới: ${channelName} (${ticketChannel.id}) cho user ${interaction.user.tag}`);
 
       return interaction.editReply({
-        content: `✅ Ticket của bạn đã được tạo thành công tại: <#${ticketChannel.id}>`
+        content: `🎉 Ticket hỗ trợ của bạn đã được khởi tạo thành công! Hãy bấm vào đây để chuyển tới kênh: <#${ticketChannel.id}>`
       });
     } catch (err) {
       logger.error('Lỗi khi tạo kênh ticket:', err);
       return interaction.editReply({
-        embeds: [CustomEmbed.error('Lỗi', `Không thể tạo kênh ticket: \`${err.message}\``)]
+        embeds: [CustomEmbed.error('Lỗi Tạo Kênh', `Không thể tạo kênh ticket: \`${err.message}\``)]
       });
     }
   }

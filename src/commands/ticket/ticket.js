@@ -7,12 +7,13 @@ const {
   ButtonStyle 
 } = require('discord.js');
 const CustomEmbed = require('../../utils/embedBuilder');
+const { PALETTE, DIVIDER } = require('../../utils/embedBuilder');
 const guildService = require('../../database/guildService');
 
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('ticket')
-    .setDescription('Hệ thống Ticket hỗ trợ thành viên chuyên nghiệp')
+    .setDescription('Hệ thống Ticket hỗ trợ & CSKH thành viên chuyên nghiệp')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .addSubcommand(sub =>
       sub.setName('setup')
@@ -62,17 +63,32 @@ module.exports = {
         logChannelId: logChannel ? logChannel.id : null
       });
 
-      // Create permanent ticket button embed
-      const ticketEmbed = new CustomEmbed()
-        .setColor(0x5865F2)
-        .setTitle('🎫 Trung Tâm Hỗ Trợ Thành Viên')
+      // Bảng Embed Mở Ticket Lộng Lẫy & Chuyên Nghiệp
+      const ticketEmbed = CustomEmbed.card(PALETTE.blurple)
+        .setAuthor({
+          name: `TRUNG TÂM DỊCH VỤ & CHĂM SÓC THÀNH VIÊN`,
+          iconURL: interaction.guild.iconURL({ dynamic: true })
+        })
+        .setTitle('🎫 YÊU CẦU HỖ TRỢ KỸ THUẬT & CSKH 🎫')
         .setDescription(
-          'Chào mừng bạn đến với hệ thống hỗ trợ!\n\n' +
-          '• Nhấn vào nút **[📩 Mở Ticket]** bên dưới để tạo một kênh trao đổi riêng tư với đội ngũ quản trị.\n' +
-          '• Vui lòng mô tả rõ ràng vấn đề hoặc thắc mắc của bạn khi được yêu cầu.\n' +
-          '• Nghiêm cấm tạo ticket với mục đích quấy rối, spam.'
+          `Chào mừng bạn đến với kênh hỗ trợ chính thức của **${interaction.guild.name}**!\n\n` +
+          `${DIVIDER}\n` +
+          `📌 **HƯỚNG DẪN MỞ TICKET:**\n` +
+          `• Nhấn vào nút **[📩 Mở Ticket Hỗ Trợ]** màu xanh bên dưới.\n` +
+          `• Nhập lý do hoặc vấn đề bạn cần giải quyết vào khung popup.\n` +
+          `• Hệ thống sẽ tạo một kênh chat riêng tư hoàn toàn chỉ giữa bạn và Ban Quản Trị.\n\n` +
+          `⏱️ **THỜI GIAN LÀM VIỆC & PHẢN HỒI:**\n` +
+          `• Đội ngũ Admin & Staff sẽ phản hồi bạn trong thời gian sớm nhất!\n\n` +
+          `⚠️ **NỘI QUY CHUNG:**\n` +
+          `• Vui lòng mô tả vấn đề rõ ràng, gửi kèm ảnh chụp màn hình nếu có.\n` +
+          `• Nghiêm cấm tạo ticket với mục đích quấy rối, quảng cáo hoặc spam.\n` +
+          `${DIVIDER}`
         )
-        .setFooter({ text: `${interaction.guild.name} • Support System`, iconURL: interaction.guild.iconURL({ dynamic: true }) });
+        .setThumbnail(interaction.guild.iconURL({ dynamic: true, size: 256 }))
+        .setFooter({ 
+          text: `${interaction.guild.name} Support System • Luôn sẵn sàng đồng hành cùng bạn! 💖`, 
+          iconURL: interaction.guild.iconURL({ dynamic: true }) 
+        });
 
       const ticketRow = new ActionRowBuilder().addComponents(
         new ButtonBuilder()
@@ -87,10 +103,10 @@ module.exports = {
       return interaction.reply({
         embeds: [CustomEmbed.success(
           'Thiết Lập Ticket Hoàn Tất',
-          `✅ Đã gửi bảng tạo ticket thành công vào kênh ${channel}!\n` +
-          `📁 **Danh mục:** ${category ? category.name : 'Mặc định'}\n` +
-          `🛡️ **Vai trò Staff:** ${staffRole ? staffRole : 'Chưa thiết lập'}\n` +
-          `📑 **Kênh Log Transcript:** ${logChannel ? logChannel : 'Chưa thiết lập'}`
+          `✅ Đã gửi bảng mở ticket thành công vào kênh ${channel}!\n\n` +
+          `📁 **Danh mục:** ${category ? `\`${category.name}\`` : '*(Mặc định)*'}\n` +
+          `🛡️ **Vai trò Staff:** ${staffRole ? `${staffRole}` : '*(Chưa đặt)*'}\n` +
+          `📑 **Kênh Log Transcript:** ${logChannel ? `${logChannel}` : '*(Chưa đặt)*'}`
         )],
         ephemeral: true
       });
@@ -100,12 +116,11 @@ module.exports = {
       const ticket = guildService.getTicket(interaction.channelId);
       if (!ticket) {
         return interaction.reply({
-          embeds: [CustomEmbed.error('Lỗi', 'Lệnh này chỉ có thể sử dụng bên trong các kênh Ticket!')],
+          embeds: [CustomEmbed.error('Lỗi Thao Tác', 'Lệnh này chỉ có thể sử dụng bên trong các kênh Ticket đang mở!')],
           ephemeral: true
         });
       }
 
-      // Close ticket via service and notify
       guildService.closeTicket(interaction.channelId);
 
       const closeRow = new ActionRowBuilder().addComponents(
@@ -116,7 +131,7 @@ module.exports = {
           .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
           .setCustomId('ticket_delete')
-          .setLabel('Xóa Kênh')
+          .setLabel('Xóa Kênh Ngay')
           .setEmoji('🗑️')
           .setStyle(ButtonStyle.Danger)
       );
@@ -124,8 +139,8 @@ module.exports = {
       return interaction.reply({
         embeds: [CustomEmbed.warning(
           'Ticket Đã Đóng',
-          `Ticket đã được đóng bởi ${interaction.user}.\n` +
-          `Bạn có thể lưu **Transcript** hoặc **Xóa Kênh** ngay bây giờ.`
+          `Ticket này đã được đóng lại bởi ${interaction.user}.\n` +
+          `Kênh đã chuyển sang chế độ khóa. Bạn có thể xuất file nhật ký hoặc xóa kênh vĩnh viễn.`
         )],
         components: [closeRow]
       });

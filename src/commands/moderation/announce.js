@@ -1,12 +1,14 @@
 const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
 const CustomEmbed = require('../../utils/embedBuilder');
+const { PALETTE, DIVIDER } = require('../../utils/embedBuilder');
 
 const COLOR_MAP = {
-  blue: 0x5865F2,
-  green: 0x57F287,
-  red: 0xED4245,
-  yellow: 0xFEE75C,
-  purple: 0x9B59B6
+  blue: PALETTE.blurple,
+  green: PALETTE.emerald,
+  red: PALETTE.ruby,
+  yellow: PALETTE.amber,
+  purple: PALETTE.amethyst,
+  cyan: PALETTE.cyan
 };
 
 module.exports = {
@@ -39,7 +41,8 @@ module.exports = {
           { name: 'Xanh Lá', value: 'green' },
           { name: 'Đỏ', value: 'red' },
           { name: 'Vàng', value: 'yellow' },
-          { name: 'Tím', value: 'purple' }
+          { name: 'Tím', value: 'purple' },
+          { name: 'Xanh Cyan', value: 'cyan' }
         )
     )
     .addStringOption(option =>
@@ -66,17 +69,24 @@ module.exports = {
     const pingType = interaction.options.getString('ping') || 'none';
     const imageUrl = interaction.options.getString('image');
 
-    const embed = new CustomEmbed()
-      .setColor(COLOR_MAP[colorKey] || COLOR_MAP.blue)
-      .setTitle(`📢 ${title}`)
-      .setDescription(content)
+    const embed = CustomEmbed.card(COLOR_MAP[colorKey] || PALETTE.blurple)
       .setAuthor({
-        name: interaction.guild.name,
+        name: `📢 THÔNG BÁO TỪ BAN QUẢN TRỊ • ${interaction.guild.name.toUpperCase()}`,
         iconURL: interaction.guild.iconURL({ dynamic: true })
       })
+      .setTitle(`✨ ${title} ✨`)
+      .setDescription(
+        `${DIVIDER}\n\n` +
+        `${content}\n\n` +
+        `${DIVIDER}`
+      )
+      .addFields(
+        { name: '👮 Người đăng', value: `${interaction.user} (\`${interaction.user.tag}\`)`, inline: true },
+        { name: '⏰ Thời gian', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: true }
+      )
       .setFooter({
-        text: `Đăng bởi ${interaction.user.tag}`,
-        iconURL: interaction.user.displayAvatarURL({ dynamic: true })
+        text: `${interaction.guild.name} Official Announcement • Hãy tương tác nếu bạn đã đọc nhé! 💬`,
+        iconURL: interaction.guild.iconURL({ dynamic: true })
       });
 
     if (imageUrl) {
@@ -94,7 +104,7 @@ module.exports = {
       });
 
       await interaction.reply({
-        embeds: [CustomEmbed.success('Thành Công', `Đã gửi thông báo thành công đến kênh ${channel}!`)],
+        embeds: [CustomEmbed.success('Gửi Thông Báo Thành Công', `✅ Đã đăng thông báo thành công vào kênh ${channel}!`)],
         ephemeral: true
       });
     } catch (err) {

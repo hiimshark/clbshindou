@@ -10,6 +10,7 @@ const {
   PermissionFlagsBits 
 } = require('discord.js');
 const CustomEmbed = require('../../utils/embedBuilder');
+const { PALETTE, DIVIDER } = require('../../utils/embedBuilder');
 const guildService = require('../../database/guildService');
 const transcriptUtil = require('../../utils/transcript');
 const logger = require('../../utils/logger');
@@ -23,13 +24,13 @@ module.exports = {
     if (customId === 'ticket_open') {
       const modal = new ModalBuilder()
         .setCustomId('ticket_modal_submit')
-        .setTitle('Tạo Yêu Cầu Hỗ Trợ');
+        .setTitle('Tạo Yêu Cầu Hỗ Trợ Kỹ Thuật');
 
       const reasonInput = new TextInputBuilder()
         .setCustomId('ticket_reason')
-        .setLabel('Lý do bạn cần hỗ trợ là gì?')
+        .setLabel('Vấn đề bạn cần hỗ trợ là gì?')
         .setStyle(TextInputStyle.Paragraph)
-        .setPlaceholder('Vui lòng mô tả chi tiết vấn đề bạn đang gặp phải...')
+        .setPlaceholder('Vui lòng mô tả chi tiết sự cố hoặc câu hỏi của bạn tại đây...')
         .setRequired(true)
         .setMaxLength(1000);
 
@@ -44,14 +45,14 @@ module.exports = {
 
       if (!ticket) {
         return interaction.editReply({
-          embeds: [CustomEmbed.error('Lỗi', 'Kênh này không phải là một ticket hợp lệ trong cơ sở dữ liệu!')]
+          embeds: [CustomEmbed.error('Lỗi Dữ Liệu', 'Kênh này không phải là một ticket hợp lệ trong cơ sở dữ liệu!')]
         });
       }
 
       // Mark as closed in DB
       guildService.closeTicket(interaction.channelId);
 
-      // Disable sending messages for normal members
+      // Disable sending messages for user
       try {
         await interaction.channel.permissionOverwrites.edit(ticket.user_id, {
           SendMessages: false,
@@ -69,17 +70,28 @@ module.exports = {
           .setStyle(ButtonStyle.Secondary),
         new ButtonBuilder()
           .setCustomId('ticket_delete')
-          .setLabel('Xóa Kênh')
+          .setLabel('Xóa Kênh Vĩnh Viễn')
           .setEmoji('🗑️')
           .setStyle(ButtonStyle.Danger)
       );
 
-      const embed = CustomEmbed.warning(
-        'Ticket Đã Đóng',
-        `Ticket đã được đóng bởi ${interaction.user}.\n` +
-        `Thành viên tạo ticket không thể gửi tin nhắn mới.\n` +
-        `Bạn có thể xuất **Transcript** hoặc **Xóa Kênh** ngay bây giờ.`
-      );
+      const embed = CustomEmbed.card(PALETTE.ruby)
+        .setAuthor({
+          name: `TRẠNG THÁI TICKET: ĐÃ ĐÓNG`,
+          iconURL: interaction.guild.iconURL({ dynamic: true })
+        })
+        .setTitle('🔒 Ticket Đã Được Khóa Thành Công!')
+        .setDescription(
+          `${DIVIDER}\n` +
+          `👤 **Người thực hiện đóng:** ${interaction.user} (\`${interaction.user.tag}\`)\n` +
+          `⏰ **Thời gian đóng:** <t:${Math.floor(Date.now() / 1000)}:F>\n\n` +
+          `📋 **TRẠNG THÁI KÊNH:**\n` +
+          `• Thành viên mở ticket đã bị thu hồi quyền gửi tin nhắn mới.\n` +
+          `• Bạn có thể nhấn **[📑 Lưu Transcript]** để xuất toàn bộ lịch sử tin nhắn.\n` +
+          `• Nhấn **[🗑️ Xóa Kênh Vĩnh Viễn]** khi đã hoàn tất lưu trữ.\n` +
+          `${DIVIDER}`
+        )
+        .setFooter({ text: `${interaction.guild.name} • Ticket Closed` });
 
       return interaction.editReply({ embeds: [embed], components: [closeRow] });
     }
@@ -93,7 +105,7 @@ module.exports = {
 
         // Send to channel
         await interaction.editReply({
-          content: `✅ Đã xuất lịch sử tin nhắn của ticket:`,
+          content: `✅ Đã xuất thành công file nhật ký tin nhắn của ticket **#${interaction.channel.name}**:`,
           files: [attachment]
         });
 
@@ -103,7 +115,7 @@ module.exports = {
           const logChannel = interaction.guild.channels.cache.get(config.ticket_log_channel_id);
           if (logChannel) {
             await logChannel.send({
-              content: `📑 **Transcript từ #${interaction.channel.name}** (Xuất bởi ${interaction.user.tag}):`,
+              content: `📑 **Nhật ký Transcript mới từ #${interaction.channel.name}** (Xuất bởi ${interaction.user.tag}):`,
               files: [attachment]
             });
           }
@@ -111,7 +123,7 @@ module.exports = {
       } catch (err) {
         logger.error('Lỗi khi xuất transcript:', err);
         return interaction.editReply({
-          embeds: [CustomEmbed.error('Lỗi', 'Không thể tạo file transcript tin nhắn!')]
+          embeds: [CustomEmbed.error('Lỗi Xuất File', 'Không thể tạo file transcript tin nhắn!')]
         });
       }
       return;
@@ -120,7 +132,7 @@ module.exports = {
     // 4. XÓA KÊNH TICKET
     if (customId === 'ticket_delete') {
       await interaction.reply({
-        embeds: [CustomEmbed.error('Xóa Ticket', 'Kênh này sẽ tự động bị xóa sau **5 giây**...')]
+        embeds: [CustomEmbed.warning('Đang Xóa Kênh', 'Kênh hỗ trợ này sẽ tự động bị xóa vĩnh viễn sau **5 giây**... ⏳')]
       });
 
       setTimeout(async () => {
