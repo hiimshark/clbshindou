@@ -51,18 +51,8 @@ module.exports = {
               `${DIVIDER}`
             )
             .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 512 }))
-            .addFields(
-              { name: `${EMOJIS.purplePaw} Người dùng`, value: `${member.user.tag}`, inline: true },
-              { name: `${EMOJIS.sparkle} ID Tài khoản`, value: `\`${member.id}\``, inline: true },
-              { name: `${EMOJIS.vip} Thành viên thứ`, value: `\`#${member.guild.memberCount}\``, inline: true },
-              { 
-                name: `${EMOJIS.pin} Ngày tạo tài khoản`, 
-                value: `<t:${createdTimestamp}:D> (<t:${createdTimestamp}:R>)`, 
-                inline: false 
-              }
-            )
             .setFooter({
-              text: `${member.guild.name} • Hãy đọc kỹ nội quy máy chủ nhé!`,
+              text: `Thành viên thứ #${member.guild.memberCount} • ${member.guild.name}`,
               iconURL: member.guild.iconURL({ dynamic: true })
             });
 

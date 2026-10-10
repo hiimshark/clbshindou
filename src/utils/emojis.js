@@ -21,7 +21,7 @@ const EMOJIS = {
   crownOwner: '<a:tpowner:1117016894302597190>',
   pin: '<a:pin1999:1116682907675799573>',
   heart: '<a:heartCopy:1110555799777972226>',
-  vip: '<a:ani_vip_2:1458779904345641122>',
+  vip: '<:8819shinystar3:1512142936287088791>',
   purplePaw: '<a:294064purplepaw:1515288184223825942>',
   brownBow: '<a:39411brownbow:1515288160727339028>',
   catSpecial: '<a:806802508755632128:1370805884153757798>',

@@ -36,18 +36,8 @@ module.exports = {
               `> ${formattedMessage}\n` +
               `${DIVIDER}`
             )
-            .addFields(
-              { name: `${EMOJIS.purplePaw} Tài khoản`, value: `${member.user ? member.user.tag : member.displayName}`, inline: true },
-              { name: `${EMOJIS.sparkle} ID`, value: `\`${member.id}\``, inline: true },
-              { name: `${EMOJIS.vip} Còn lại`, value: `\`${member.guild.memberCount}\` thành viên`, inline: true },
-              ...(joinedTimestamp ? [{ 
-                name: `${EMOJIS.pin} Đã đồng hành từ`, 
-                value: `<t:${joinedTimestamp}:D> (<t:${joinedTimestamp}:R>)`, 
-                inline: false 
-              }] : [])
-            )
             .setFooter({ 
-              text: `Hy vọng sẽ có dịp gặp lại bạn tại ${member.guild.name}! ✨`,
+              text: `Máy chủ hiện còn lại ${member.guild.memberCount} thành viên • ${member.guild.name}`,
               iconURL: member.guild.iconURL({ dynamic: true }) 
             });
 
