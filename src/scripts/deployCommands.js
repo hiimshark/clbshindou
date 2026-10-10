@@ -4,7 +4,7 @@ const path = require('path');
 const { config } = require('../config');
 const logger = require('../utils/logger');
 
-async function deploySlashCommands() {
+async function deploySlashCommands(client = null) {
   if (!config.token || !config.clientId) {
     logger.warn('Chưa có DISCORD_TOKEN hoặc CLIENT_ID. Bỏ qua việc tự động đăng ký Slash Commands.');
     return;
@@ -33,20 +33,32 @@ async function deploySlashCommands() {
   try {
     logger.info(`Bắt đầu đăng ký ${commands.length} application (/) commands...`);
 
-    if (config.devGuildId) {
-      // Fast registration for development guild
+    // 1. Đăng ký Global commands
+    await rest.put(
+      Routes.applicationCommands(config.clientId),
+      { body: commands }
+    );
+    logger.success(`Đã đăng ký ${commands.length} lệnh Global cho Bot!`);
+
+    // 2. Đăng ký TỨC THÌ (Instant Guild Commands) cho tất cả server bot đang tham gia
+    if (client && client.guilds && client.guilds.cache.size > 0) {
+      for (const [guildId, guild] of client.guilds.cache) {
+        try {
+          await rest.put(
+            Routes.applicationGuildCommands(config.clientId, guildId),
+            { body: commands }
+          );
+          logger.success(`⚡ Đã đồng bộ ${commands.length} lệnh tức thì cho máy chủ: ${guild.name} (${guildId})!`);
+        } catch (guildErr) {
+          logger.warn(`Không thể đăng ký lệnh riêng cho guild ${guild.name}:`, guildErr.message);
+        }
+      }
+    } else if (config.devGuildId) {
       await rest.put(
         Routes.applicationGuildCommands(config.clientId, config.devGuildId),
         { body: commands }
       );
-      logger.success(`Đã đăng ký ${commands.length} lệnh cho Dev Guild: ${config.devGuildId}`);
-    } else {
-      // Global registration
-      await rest.put(
-        Routes.applicationCommands(config.clientId),
-        { body: commands }
-      );
-      logger.success(`Đã đăng ký thành công ${commands.length} lệnh Global cho Bot!`);
+      logger.success(`Đã đăng ký lệnh cho Dev Guild: ${config.devGuildId}`);
     }
   } catch (error) {
     logger.error('Lỗi khi đăng ký Slash Commands với Discord REST API:', error);

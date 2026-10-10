@@ -18,9 +18,9 @@ module.exports = {
       status: 'online'
     });
 
-    // Auto deploy slash commands
+    // Auto deploy slash commands tức thì cho các máy chủ
     try {
-      await deploySlashCommands();
+      await deploySlashCommands(client);
     } catch (err) {
       logger.error('Lỗi tự động đăng ký lệnh khi sẵn sàng:', err.message);
     }
