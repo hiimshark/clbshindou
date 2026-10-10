@@ -32,14 +32,32 @@ module.exports = {
 
     await interaction.deferReply();
 
+    let finalQuery = query.trim();
+
+    // Tự động phân giải link YouTube thành tiêu đề bài hát qua API YouTube chính thức siêu tốc (chống lỗi 429 Cloud IP)
+    if (/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(finalQuery)) {
+      try {
+        const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(finalQuery)}&format=json`;
+        const res = await fetch(oembedUrl);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.title) {
+            finalQuery = data.title;
+          }
+        }
+      } catch {
+        // Fallback giữ nguyên link nếu mạng chậm
+      }
+    }
+
     try {
-      await client.distube.play(voiceChannel, query, {
+      await client.distube.play(voiceChannel, finalQuery, {
         member: interaction.member,
         textChannel: interaction.channel
       });
 
       return interaction.editReply({
-        embeds: [CustomEmbed.info('Đang Tìm Kiếm & Nạp Bài Hát', `🔍 Đang tải bài hát theo yêu cầu: **${query}**...`)]
+        embeds: [CustomEmbed.success('Đã Nhận Bài Hát', `🎵 Đã nạp yêu cầu: **${finalQuery}**\n⚡ Nhạc đang bắt đầu phát vào phòng thoại của bạn!`)]
       });
     } catch (err) {
       return interaction.editReply({

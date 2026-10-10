@@ -1,7 +1,6 @@
 const { DisTube } = require('distube');
 const { SpotifyPlugin } = require('@distube/spotify');
 const { SoundCloudPlugin } = require('@distube/soundcloud');
-const { YtDlpPlugin } = require('@distube/yt-dlp');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const CustomEmbed = require('../utils/embedBuilder');
 const { PALETTE, DIVIDER } = require('../utils/embedBuilder');
@@ -45,8 +44,7 @@ function initMusic(client) {
     emitAddListWhenCreatingQueue: false,
     plugins: [
       new SpotifyPlugin(),
-      new SoundCloudPlugin(),
-      new YtDlpPlugin()
+      new SoundCloudPlugin()
     ]
   });
 
@@ -112,11 +110,12 @@ function initMusic(client) {
     queue.textChannel?.send({ embeds: [embed] }).catch(() => {});
   });
 
-  distube.on('error', (channel, error) => {
-    logger.error('Lỗi DisTube:', error);
-    if (channel?.send) {
-      channel.send({
-        embeds: [CustomEmbed.error('Lỗi Phát Nhạc', `Đã xảy ra sự cố: \`${error.message?.slice(0, 200)}\``)]
+  distube.on('error', (error, queue, song) => {
+    logger.error('Lỗi DisTube:', error?.message || error);
+    const textChannel = queue?.textChannel;
+    if (textChannel?.send) {
+      textChannel.send({
+        embeds: [CustomEmbed.error('Lỗi Phát Nhạc', `Đã xảy ra sự cố: \`${(error?.message || error).toString().slice(0, 200)}\``)]
       }).catch(() => {});
     }
   });
