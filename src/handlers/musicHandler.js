@@ -1,6 +1,7 @@
 const { DisTube } = require('distube');
 const { SpotifyPlugin } = require('@distube/spotify');
 const { SoundCloudPlugin } = require('@distube/soundcloud');
+const { CustomYtDlpPlugin } = require('../utils/ytPlugin');
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const CustomEmbed = require('../utils/embedBuilder');
 const { PALETTE, DIVIDER } = require('../utils/embedBuilder');
@@ -44,6 +45,7 @@ function initMusic(client) {
     emitAddListWhenCreatingQueue: false,
     plugins: [
       new SpotifyPlugin(),
+      new CustomYtDlpPlugin(),
       new SoundCloudPlugin()
     ]
   });

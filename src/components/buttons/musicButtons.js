@@ -41,6 +41,8 @@ module.exports = {
       });
     }
 
+    const queue = client.distube.getQueue(interaction.guildId);
+
     if (!queue) {
       return interaction.reply({
         embeds: [CustomEmbed.warning('Hết nhạc', 'Hiện tại không có bài hát nào đang phát!')],

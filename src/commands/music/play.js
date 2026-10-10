@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { config } = require('../../config');
 const CustomEmbed = require('../../utils/embedBuilder');
+const { searchYouTube } = require('../../utils/ytPlugin');
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -44,32 +45,25 @@ module.exports = {
 
     await interaction.deferReply();
 
-    let finalQuery = query.trim();
+    let target = query.trim();
+    const isUrl = /^https?:\/\//i.test(target);
 
-    // Tự động phân giải link YouTube thành tiêu đề bài hát qua API YouTube chính thức siêu tốc (chống lỗi 429 Cloud IP)
-    if (/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\//i.test(finalQuery)) {
-      try {
-        const oembedUrl = `https://www.youtube.com/oembed?url=${encodeURIComponent(finalQuery)}&format=json`;
-        const res = await fetch(oembedUrl);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.title) {
-            finalQuery = data.title;
-          }
-        }
-      } catch {
-        // Fallback giữ nguyên link nếu mạng chậm
+    // Nếu người dùng nhập tên bài hát, tìm chính xác video YouTube gốc trong < 1s
+    if (!isUrl) {
+      const ytUrl = await searchYouTube(target);
+      if (ytUrl) {
+        target = ytUrl;
       }
     }
 
     try {
-      await client.distube.play(voiceChannel, finalQuery, {
+      await client.distube.play(voiceChannel, target, {
         member: interaction.member,
         textChannel: interaction.channel
       });
 
       return interaction.editReply({
-        embeds: [CustomEmbed.success('Đã Nhận Bài Hát', `🎵 Đã nạp yêu cầu: **${finalQuery}**\n⚡ Nhạc đang bắt đầu phát vào phòng thoại của bạn!`)]
+        embeds: [CustomEmbed.success('Đã Nhận Bài Hát', `🎵 Đã nạp yêu cầu: **${query}**\n⚡ Nhạc đang bắt đầu phát vào phòng thoại của bạn!`)]
       });
     } catch (err) {
       return interaction.editReply({
