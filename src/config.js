@@ -3,7 +3,7 @@ const path = require('path');
 
 const config = {
   token: process.env.DISCORD_TOKEN || '',
-  clientId: process.env.CLIENT_ID || '',
+  clientId: process.env.CLIENT_ID || '1558502201868030012',
   devGuildId: process.env.DEV_GUILD_ID || '',
   port: parseInt(process.env.PORT, 10) || 3000,
   databasePath: process.env.DATABASE_PATH 
